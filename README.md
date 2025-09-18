@@ -390,7 +390,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/notion-github-sync/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/notion-github-sync/discussions)
-- **Email**: your-email@example.com
+- **Email**: tiagomendesalves.tc.tc@gmail.com
 
 ---
 
