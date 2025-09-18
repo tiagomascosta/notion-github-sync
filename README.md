@@ -388,8 +388,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/tiagomascosta/notion-github-sync/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/tiagomascosta/notion-github-sync/discussions)
 - **Email**: tiagomendesalves.tc.tc@gmail.com
 
 ---
