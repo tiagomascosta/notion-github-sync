@@ -496,7 +496,7 @@ SIZE_MAP_NOTION_TO_GH = {k: k for k in ["XS", "S", "M", "L", "XL"]}
 async def process_validated_page(page_id: str):
     try:
         data = await get_page_fields(page_id)
-        print(f"[debug] Page data: status='{data['status']}', title='{data['title']}'")
+        print(f"[info] Processing page: '{data['title']}' (Status: {data['status']})")
         
         # Validate page data
         is_valid, validation_message = validate_page_data(data)
@@ -537,14 +537,12 @@ async def process_validated_page(page_id: str):
         project_item_id = None
         issue = None
 
-        print(f"[debug] Creating issue with title: '{data['title']}'")
+        print(f"[info] Creating GitHub issue: '{data['title']}'")
         body_text = '\n'.join(body_parts)
-        print(f"[debug] Body length: {len(body_text)} characters")
-        print(f"[debug] Labels: {labels}")
 
         if GITHUB_PROJECT_CREATE_DRAFT and GITHUB_PROJECT_ID:
             # Draft Item no Project (sem Issue no repo)
-            print(f"[debug] Creating draft item in project...")
+            print(f"[info] Creating draft item in project...")
             project_item_id = await create_draft_item_in_project(GITHUB_PROJECT_ID, data["title"], body_text)
             if project_item_id:
                 print(f"[ok] Draft created in Project: item_id={project_item_id}")
@@ -552,7 +550,7 @@ async def process_validated_page(page_id: str):
                 print(f"[error] Failed to create draft item")
         else:
             # Issue no repo (recomendado)
-            print(f"[debug] Creating GitHub issue...")
+            print(f"[info] Creating GitHub issue...")
             issue = await create_github_issue(data["title"], body_text, labels)
             if issue:
                 print(f"[ok] Issue created: #{issue.get('number')} {issue.get('html_url')}")
@@ -616,11 +614,10 @@ async def process_validated_page(page_id: str):
 # Polling loop
 # =========================
 async def poll_loop():
-    print(f"[info] Starting polling loop (interval: {POLL_INTERVAL} seconds)")
+    print(f"[info] Polling every {POLL_INTERVAL} seconds for pages to sync")
     try:
         while True:
             try:
-                print(f"[info] Polling Notion database for pages to sync...")
                 query = {
                     "database_id": NOTION_DB,
                     "filter": {
@@ -634,19 +631,14 @@ async def poll_loop():
                 res = notion.databases.query(**query)
                 results = res.get("results", [])
                 if results:
-                    print(f"[info] Found {len(results)} Notion page(s) to sync.")
-                else:
-                    print(f"[info] Polling cycle completed - no pages to sync (Status='Validated' and 'In Sync With Github'=false)")
+                    print(f"[info] Found {len(results)} page(s) to sync")
                 for r in results:
                     page_id = r["id"]
-                    print(f"[debug] Processing page: {page_id}")
                     try:
                         await process_validated_page(page_id)
-                        print(f"[debug] Successfully processed page: {page_id}")
+                        print(f"[ok] Successfully synced page: {page_id}")
                     except Exception as e:
-                        print(f"[error] Failed to process page {page_id}: {e}")
-                        import traceback
-                        traceback.print_exc()
+                        print(f"[error] Failed to sync page {page_id}: {e}")
             except Exception as e:
                 print(f"[error] Polling cycle failed: {e}")
             await asyncio.sleep(POLL_INTERVAL)
@@ -657,15 +649,9 @@ async def poll_loop():
 
 @app.on_event("startup")
 async def on_startup():
-    print("[debug] Starting application startup...")
-    print(f"[debug] NOTION_TOKEN: {'SET' if NOTION_TOKEN else 'NOT SET'}")
-    print(f"[debug] NOTION_DB: {'SET' if NOTION_DB else 'NOT SET'}")
-    print(f"[debug] GITHUB_TOKEN: {'SET' if GITHUB_TOKEN else 'NOT SET'}")
-    print(f"[debug] POLL_INTERVAL: {POLL_INTERVAL}")
+    print("[info] Notion-GitHub Sync starting up...")
     await init_db()
-    print("[debug] Database initialized, starting polling loop...")
     asyncio.create_task(poll_loop())
-    print("[debug] Polling loop task created")
+    print("[info] Polling loop started")
 
-# Module loaded successfully
-print("[debug] app.py module loaded successfully")
+# Application ready
