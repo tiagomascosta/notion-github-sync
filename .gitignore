@@ -64,3 +64,6 @@ Thumbs.db
 *.tmp
 *.temp
 *~
+
+sync.out
+sync.pid
