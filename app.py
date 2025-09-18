@@ -271,28 +271,34 @@ async def get_page_fields(page_id: str) -> dict:
 
     # Safe property extraction with null checks
     status = None
-    if props.get("Status"):
-        status = props["Status"].get("select", {}).get("name")
+    status_prop = props.get("Status")
+    if status_prop and status_prop.get("select"):
+        status = status_prop.get("select", {}).get("name")
     
     company = ""
-    if props.get("Company"):
-        company = _plain(props["Company"].get("rich_text", []))
+    company_prop = props.get("Company")
+    if company_prop:
+        company = _plain(company_prop.get("rich_text", []))
     
     customer_types = []
-    if props.get("Customer Type"):
-        customer_types = [o.get("name") for o in props["Customer Type"].get("multi_select", []) if o.get("name")]
+    customer_type_prop = props.get("Customer Type")
+    if customer_type_prop:
+        customer_types = [o.get("name") for o in customer_type_prop.get("multi_select", []) if o.get("name")]
     
     priority = None
-    if props.get("Priority"):
-        priority = props["Priority"].get("select", {}).get("name")
+    priority_prop = props.get("Priority")
+    if priority_prop and priority_prop.get("select"):
+        priority = priority_prop.get("select", {}).get("name")
     
     size = None
-    if props.get("Size"):
-        size = props["Size"].get("select", {}).get("name")
+    size_prop = props.get("Size")
+    if size_prop and size_prop.get("select"):
+        size = size_prop.get("select", {}).get("name")
     
     in_sync = False
-    if props.get("In Sync With Github"):
-        in_sync = props["In Sync With Github"].get("checkbox", False)
+    in_sync_prop = props.get("In Sync With Github")
+    if in_sync_prop:
+        in_sync = in_sync_prop.get("checkbox", False)
 
     details_lines = []
     if company: details_lines.append(f"**Company:** {company}")
@@ -616,6 +622,8 @@ async def process_validated_page(page_id: str):
     
     except Exception as e:
         print(f"[error] Failed to process page {page_id}: {e}")
+        import traceback
+        print(f"[debug] Full traceback: {traceback.format_exc()}")
         # Don't re-raise - let other pages continue processing
 
 # =========================
