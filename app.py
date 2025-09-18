@@ -545,7 +545,7 @@ async def process_validated_page(page_id: str):
         else:
             # Issue no repo (recomendado)
             print(f"[debug] Creating GitHub issue...")
-            issue = await create_github_issue(data["title"], "\n".join(body_parts), labels)
+            issue = await create_github_issue(data["title"], body_text, labels)
             if issue:
                 print(f"[ok] Issue created: #{issue.get('number')} {issue.get('html_url')}")
             else:
@@ -608,8 +608,10 @@ async def process_validated_page(page_id: str):
 # Polling loop
 # =========================
 async def poll_loop():
+    print(f"[info] Starting polling loop (interval: {POLL_INTERVAL} seconds)")
     while True:
         try:
+            print(f"[info] Polling Notion database for pages to sync...")
             query = {
                 "database_id": NOTION_DB,
                 "filter": {
@@ -624,6 +626,8 @@ async def poll_loop():
             results = res.get("results", [])
             if results:
                 print(f"[info] Found {len(results)} Notion page(s) to sync.")
+            else:
+                print(f"[info] Polling cycle completed - no pages to sync (Status='Validated' and 'In Sync With Github'=false)")
             for r in results:
                 page_id = r["id"]
                 print(f"[debug] Processing page: {page_id}")
