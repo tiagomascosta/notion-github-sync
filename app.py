@@ -530,13 +530,14 @@ async def process_validated_page(page_id: str):
         issue = None
 
         print(f"[debug] Creating issue with title: '{data['title']}'")
-        print(f"[debug] Body length: {len('\n'.join(body_parts))} characters")
+        body_text = '\n'.join(body_parts)
+        print(f"[debug] Body length: {len(body_text)} characters")
         print(f"[debug] Labels: {labels}")
 
         if GITHUB_PROJECT_CREATE_DRAFT and GITHUB_PROJECT_ID:
             # Draft Item no Project (sem Issue no repo)
             print(f"[debug] Creating draft item in project...")
-            project_item_id = await create_draft_item_in_project(GITHUB_PROJECT_ID, data["title"], "\n".join(body_parts))
+            project_item_id = await create_draft_item_in_project(GITHUB_PROJECT_ID, data["title"], body_text)
             if project_item_id:
                 print(f"[ok] Draft created in Project: item_id={project_item_id}")
             else:

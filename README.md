@@ -61,9 +61,31 @@ DRY_RUN=false
 
 ### 4. Run the Application
 
+**Option A: Manual Run**
+
 ```bash
+# Load environment variables first
+set -a; source .env; set +a
+
+# Start the application
 uvicorn app:app --host 127.0.0.1 --port 8088
 ```
+
+**Option B: Using the Run Script (Recommended)**
+
+```bash
+# Make the script executable (only needed once)
+chmod +x run.sh
+
+# Run the application in background:
+nohup ./run.sh > sync.out 2>&1 & echo $! > sync.pid
+```
+
+The `run.sh` script automatically:
+
+- Loads environment variables from `.env`
+- Activates the virtual environment
+- Starts the application on `http://127.0.0.1:8088`
 
 ## Setup Guide
 
@@ -84,15 +106,15 @@ uvicorn app:app --host 127.0.0.1 --port 8088
 
 Create a Notion database with these properties:
 
-| Property Name | Type | Required | Description |
-|---------------|------|----------|-------------|
-| **Name** | Title | Required | Page title (becomes GitHub issue title) |
-| **Status** | Select | Required | Must include "Validated" option |
-| **In Sync With Github** | Checkbox | Required | Tracks sync status |
-| **Priority** | Select | Optional | "Low", "Medium", "High" |
-| **Size** | Select | Optional | "XS", "S", "M", "L", "XL" |
-| **Company** | Rich Text | Optional | Company information |
-| **Customer Type** | Multi-select | Optional | "Type A", "Type B", etc. |
+| Property Name                 | Type         | Required | Description                             |
+| ----------------------------- | ------------ | -------- | --------------------------------------- |
+| **Name**                | Title        | Required | Page title (becomes GitHub issue title) |
+| **Status**              | Select       | Required | Must include "Validated" option         |
+| **In Sync With Github** | Checkbox     | Required | Tracks sync status                      |
+| **Priority**            | Select       | Optional | "Low", "Medium", "High"                 |
+| **Size**                | Select       | Optional | "XS", "S", "M", "L", "XL"               |
+| **Company**             | Rich Text    | Optional | Company information                     |
+| **Customer Type**       | Multi-select | Optional | "Type A", "Type B", etc.                |
 
 #### 3. Share Database with Integration
 
@@ -113,7 +135,7 @@ Create a Notion database with these properties:
 
 #### 1. Create Personal Access Token
 
-1. Go to [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+1. Go to [GitHub Settings &gt; Developer settings &gt; Personal access tokens](https://github.com/settings/tokens)
 2. Click **"Generate new token (classic)"**
 3. Set expiration and select scopes:
    - ✅ **repo** (Full control of private repositories)
@@ -201,18 +223,18 @@ gh api graphql -f query='
 
 ### Content Conversion
 
-| Notion Element | GitHub Markdown |
-|----------------|-----------------|
-| Headings | `#`, `##`, `###` |
-| Bulleted Lists | `- item` |
-| Numbered Lists | `1. item` |
-| Checkboxes | `- [ ]` / `- [x]` |
-| Code Blocks | ```language blocks |
-| Images | `![caption](url)` |
-| Files | `[filename](url)` |
-| Videos | `[video](url)` |
-| Quotes | `> quote` |
-| Callouts | `> **text**` |
+| Notion Element | GitHub Markdown        |
+| -------------- | ---------------------- |
+| Headings       | `#`, `##`, `###` |
+| Bulleted Lists | `- item`             |
+| Numbered Lists | `1. item`            |
+| Checkboxes     | `- [ ]` / `- [x]`  |
+| Code Blocks    | ```language blocks     |
+| Images         | `![caption](url)`    |
+| Files          | `[filename](url)`    |
+| Videos         | `[video](url)`       |
+| Quotes         | `> quote`            |
+| Callouts       | `> **text**`         |
 
 ## Customization
 
@@ -285,37 +307,41 @@ body_parts = [
 
 ## Configuration Options
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `NOTION_TOKEN` | - | Notion integration token |
-| `NOTION_DATABASE_ID` | - | Notion database ID |
-| `GITHUB_TOKEN` | - | GitHub personal access token |
-| `GITHUB_OWNER` | - | GitHub username/organization |
-| `GITHUB_REPO` | - | GitHub repository name |
-| `GITHUB_PROJECT_ID` | - | GitHub Project ID (optional) |
-| `POLL_INTERVAL_SECONDS` | 120 | Polling interval in seconds |
-| `DRY_RUN` | false | Test mode (no actual changes) |
+| Environment Variable      | Default | Description                   |
+| ------------------------- | ------- | ----------------------------- |
+| `NOTION_TOKEN`          | -       | Notion integration token      |
+| `NOTION_DATABASE_ID`    | -       | Notion database ID            |
+| `GITHUB_TOKEN`          | -       | GitHub personal access token  |
+| `GITHUB_OWNER`          | -       | GitHub username/organization  |
+| `GITHUB_REPO`           | -       | GitHub repository name        |
+| `GITHUB_PROJECT_ID`     | -       | GitHub Project ID (optional)  |
+| `POLL_INTERVAL_SECONDS` | 120     | Polling interval in seconds   |
+| `DRY_RUN`               | false   | Test mode (no actual changes) |
 
 ## Troubleshooting
 
 ### Common Issues
 
 #### "Could not find database with ID"
+
 - Verify database is shared with your integration
 - Check database ID is correct (32 characters with hyphens)
 - Ensure integration has "Can edit" permissions
 
 #### "Missing required fields"
+
 - Ensure page has a title
 - Set Status to "Validated"
 - Check property names match exactly
 
 #### "Failed to create issue"
+
 - Verify GitHub token has `repo` scope
 - Check repository name and owner are correct
 - Ensure token hasn't expired
 
 #### "Property type mismatch"
+
 - Ensure Status property is "Select" type (not Multi-select)
 - Check property names match your database schema
 
@@ -332,6 +358,7 @@ curl http://127.0.0.1:8088/health
 ```
 
 Response:
+
 ```json
 {
   "status": "ok",
