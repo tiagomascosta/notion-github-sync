@@ -1,0 +1,16 @@
+nohup: a ignorar a entrada
+[debug] app.py module loaded successfully
+INFO:     Started server process [1829739]
+INFO:     Waiting for application startup.
+[debug] Starting application startup...
+[debug] NOTION_TOKEN: SET
+[debug] NOTION_DB: SET
+[debug] GITHUB_TOKEN: SET
+[debug] POLL_INTERVAL: 120
+[debug] Database initialized, starting polling loop...
+[debug] Polling loop task created
+[info] Starting polling loop (interval: 120 seconds)
+[info] Polling Notion database for pages to sync...
+[info] Polling cycle completed - no pages to sync (Status='Validated' and 'In Sync With Github'=false)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8088 (Press CTRL+C to quit)

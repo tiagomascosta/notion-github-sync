@@ -74,7 +74,15 @@ app = FastAPI()
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "poll_interval": POLL_INTERVAL, "dry_run": DRY_RUN}
+    return {
+        "status": "ok", 
+        "timestamp": datetime.now().isoformat(),
+        "notion_token_set": bool(NOTION_TOKEN),
+        "notion_db_set": bool(NOTION_DB),
+        "github_token_set": bool(GITHUB_TOKEN),
+        "poll_interval": POLL_INTERVAL,
+        "dry_run": DRY_RUN
+    }
 
 # =========================
 # Utilitários Notion
@@ -650,13 +658,14 @@ async def poll_loop():
 @app.on_event("startup")
 async def on_startup():
     print("[debug] Starting application startup...")
+    print(f"[debug] NOTION_TOKEN: {'SET' if NOTION_TOKEN else 'NOT SET'}")
+    print(f"[debug] NOTION_DB: {'SET' if NOTION_DB else 'NOT SET'}")
+    print(f"[debug] GITHUB_TOKEN: {'SET' if GITHUB_TOKEN else 'NOT SET'}")
+    print(f"[debug] POLL_INTERVAL: {POLL_INTERVAL}")
     await init_db()
     print("[debug] Database initialized, starting polling loop...")
     asyncio.create_task(poll_loop())
     print("[debug] Polling loop task created")
 
-# Debug: Check environment variables
-print(f"[debug] NOTION_TOKEN: {'SET' if NOTION_TOKEN else 'NOT SET'}")
-print(f"[debug] NOTION_DB: {'SET' if NOTION_DB else 'NOT SET'}")
-print(f"[debug] GITHUB_TOKEN: {'SET' if GITHUB_TOKEN else 'NOT SET'}")
-print(f"[debug] POLL_INTERVAL: {POLL_INTERVAL}")
+# Module loaded successfully
+print("[debug] app.py module loaded successfully")
