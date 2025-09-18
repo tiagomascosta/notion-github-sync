@@ -162,7 +162,8 @@ def _convert_notion_to_markdown(blocks: list) -> str:
         
         elif block_type == "callout":
             text = _plain(content.get("rich_text", []))
-            icon = content.get("icon", {}).get("emoji", "💡")
+            icon_obj = content.get("icon") or {}
+            icon = icon_obj.get("emoji", "💡") if icon_obj else "💡"
             if text.strip():
                 markdown_parts.append(f"> {icon} **{text}**")
                 markdown_parts.append("")
@@ -173,7 +174,9 @@ def _convert_notion_to_markdown(blocks: list) -> str:
         
         elif block_type == "image":
             # Extract image URL and caption
-            image_url = content.get("file", {}).get("url") or content.get("external", {}).get("url")
+            file_obj = content.get("file") or {}
+            external_obj = content.get("external") or {}
+            image_url = file_obj.get("url") or external_obj.get("url")
             caption = _plain(content.get("caption", []))
             
             if image_url:
@@ -191,7 +194,9 @@ def _convert_notion_to_markdown(blocks: list) -> str:
         
         elif block_type == "file":
             # Handle file attachments
-            file_url = content.get("file", {}).get("url") or content.get("external", {}).get("url")
+            file_obj = content.get("file") or {}
+            external_obj = content.get("external") or {}
+            file_url = file_obj.get("url") or external_obj.get("url")
             caption = _plain(content.get("caption", []))
             
             if file_url:
@@ -208,7 +213,9 @@ def _convert_notion_to_markdown(blocks: list) -> str:
         
         elif block_type == "video":
             # Handle video embeds
-            video_url = content.get("file", {}).get("url") or content.get("external", {}).get("url")
+            file_obj = content.get("file") or {}
+            external_obj = content.get("external") or {}
+            video_url = file_obj.get("url") or external_obj.get("url")
             caption = _plain(content.get("caption", []))
             
             if video_url:
@@ -559,7 +566,8 @@ async def process_validated_page(page_id: str):
 
         # 2) Guardar idempotência se for Issue
         if issue and not DRY_RUN:
-            await record_mapping(session, page_id, issue["number"])
+            async with AsyncSession(engine) as session:
+                await record_mapping(session, page_id, issue["number"])
 
         # 3) Marcar Notion como sincronizado e mudar status para Backlog
         await mark_synced(page_id)
