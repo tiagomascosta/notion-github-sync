@@ -654,3 +654,9 @@ async def on_startup():
     print("[debug] Database initialized, starting polling loop...")
     asyncio.create_task(poll_loop())
     print("[debug] Polling loop task created")
+
+# Debug: Check environment variables
+print(f"[debug] NOTION_TOKEN: {'SET' if NOTION_TOKEN else 'NOT SET'}")
+print(f"[debug] NOTION_DB: {'SET' if NOTION_DB else 'NOT SET'}")
+print(f"[debug] GITHUB_TOKEN: {'SET' if GITHUB_TOKEN else 'NOT SET'}")
+print(f"[debug] POLL_INTERVAL: {POLL_INTERVAL}")
