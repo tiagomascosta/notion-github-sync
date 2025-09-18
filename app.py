@@ -609,40 +609,48 @@ async def process_validated_page(page_id: str):
 # =========================
 async def poll_loop():
     print(f"[info] Starting polling loop (interval: {POLL_INTERVAL} seconds)")
-    while True:
-        try:
-            print(f"[info] Polling Notion database for pages to sync...")
-            query = {
-                "database_id": NOTION_DB,
-                "filter": {
-                    "and": [
-                        {"property": "Status", "select": {"equals": "Validated"}},
-                        {"property": "In Sync With Github", "checkbox": {"equals": False}}
-                    ]
-                },
-                "page_size": 50
-            }
-            res = notion.databases.query(**query)
-            results = res.get("results", [])
-            if results:
-                print(f"[info] Found {len(results)} Notion page(s) to sync.")
-            else:
-                print(f"[info] Polling cycle completed - no pages to sync (Status='Validated' and 'In Sync With Github'=false)")
-            for r in results:
-                page_id = r["id"]
-                print(f"[debug] Processing page: {page_id}")
-                try:
-                    await process_validated_page(page_id)
-                    print(f"[debug] Successfully processed page: {page_id}")
-                except Exception as e:
-                    print(f"[error] Failed to process page {page_id}: {e}")
-                    import traceback
-                    traceback.print_exc()
-        except Exception as e:
-            print(f"[error] Polling cycle failed: {e}")
-        await asyncio.sleep(POLL_INTERVAL)
+    try:
+        while True:
+            try:
+                print(f"[info] Polling Notion database for pages to sync...")
+                query = {
+                    "database_id": NOTION_DB,
+                    "filter": {
+                        "and": [
+                            {"property": "Status", "select": {"equals": "Validated"}},
+                            {"property": "In Sync With Github", "checkbox": {"equals": False}}
+                        ]
+                    },
+                    "page_size": 50
+                }
+                res = notion.databases.query(**query)
+                results = res.get("results", [])
+                if results:
+                    print(f"[info] Found {len(results)} Notion page(s) to sync.")
+                else:
+                    print(f"[info] Polling cycle completed - no pages to sync (Status='Validated' and 'In Sync With Github'=false)")
+                for r in results:
+                    page_id = r["id"]
+                    print(f"[debug] Processing page: {page_id}")
+                    try:
+                        await process_validated_page(page_id)
+                        print(f"[debug] Successfully processed page: {page_id}")
+                    except Exception as e:
+                        print(f"[error] Failed to process page {page_id}: {e}")
+                        import traceback
+                        traceback.print_exc()
+            except Exception as e:
+                print(f"[error] Polling cycle failed: {e}")
+            await asyncio.sleep(POLL_INTERVAL)
+    except Exception as e:
+        print(f"[error] Polling loop crashed: {e}")
+        import traceback
+        traceback.print_exc()
 
 @app.on_event("startup")
 async def on_startup():
+    print("[debug] Starting application startup...")
     await init_db()
+    print("[debug] Database initialized, starting polling loop...")
     asyncio.create_task(poll_loop())
+    print("[debug] Polling loop task created")
